@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <title>Our simple HTTP server</title>
-  <link rel="stylesheet" type="text/css" href="/style.css">
+  <link rel="stylesheet" type="text/css" href="/stylePls.css">
   
   <script>
-    const handleResponse = (response, parseResponse) => {
+    const handleResponse = async (response, parseResponse) => {
       const content = document.querySelector('#content');
 
       switch(response.status) {
@@ -25,19 +25,40 @@
           content.innerHTML = `Error code not implemented by client.`;
           break;
       }
+
+      if(parseResponse){
+        const textResponse = await response.text();
+        content.innerHTML += `<p>${textResponse}</p>`;
+      }
+      else{
+        content.innerHTML += '<p>Meta Data Only</p>';
+      }
     };
 
-    const requestUpdate = (userForm) => {
+    const requestUpdate = async (userForm) => {
       const url = userForm.querySelector('#urlField').value;
       const method = userForm.querySelector('#methodSelect').value;
       
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Accept': 'applications/json'
+        }
+      });
 
+      handleResponse(response, method === 'get');
     };
 
 
     const init = () => {
       const userForm = document.querySelector('#userForm');
       
+      const getUsers = (e) => {
+        event.preventDefault();
+        requestUpdate(userForm);
+        return false;
+      }
+      userForm.addEventListener('submit', getUsers);
     };
 
     window.onload = init;
